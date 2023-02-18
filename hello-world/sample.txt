@@ -1,0 +1,19 @@
+Welcome to http server
+Here are we
+Handling request-response cycle
+OhMG woohoo yay
+
+
+/* 
+fs.readFile('home.html', (err, home) => {
+    if (err) throw err;
+    homeHtml = home
+});
+fs.readFile('project.html', (err, project) => {
+    if (err) throw err;
+    projectHtml = project;
+});
+fs.readFile('registration.html', (err, registration) => {
+    if (err) throw err;
+    registrationHtml = registration;
+}) */
