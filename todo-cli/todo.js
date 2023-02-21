@@ -1,3 +1,5 @@
+/* eslint-disable quotes */
+/* eslint-disable semi */
 /* eslint-disable no-undef */
 const todoList = () => {
   all = [];

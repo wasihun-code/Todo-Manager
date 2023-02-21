@@ -1,3 +1,5 @@
+/* eslint-disable semi */
+/* eslint-disable quotes */
 /* eslint-disable no-undef */
 const { todoList } = require("../todo");
 
