@@ -40,6 +40,7 @@ const todoList = () => {
     overdue,
     dueToday,
     dueLater,
+    // eslint-disable-next-line comma-dangle
     toDisplayableList,
   };
 };
