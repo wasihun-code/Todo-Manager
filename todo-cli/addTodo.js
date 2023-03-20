@@ -1,10 +1,11 @@
 // addTodo.js
-var argv = require("minimist")(process.argv.slice(2));
+const argv = require("minimist")(process.argv.slice(2));
 const db = require("./models/index");
 
 const createTodo = async (params) => {
   try {
     await db.Todo.addTask(params);
+    console.log(params.dueDate);
   } catch (error) {
     console.error(error);
   }
@@ -28,4 +29,3 @@ const getJSDate = (days) => {
   await createTodo({ title, dueDate: getJSDate(dueInDays), completed: false });
   await db.Todo.showList();
 })();
-

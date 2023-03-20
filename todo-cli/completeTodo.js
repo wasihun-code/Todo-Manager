@@ -1,8 +1,6 @@
 // completeTodo.js
-var argv = require("minimist")(process.argv.slice(2));
+const argv = require("minimist")(process.argv.slice(2));
 const db = require("./models/index");
-const minimist = require('minimist')
-
 
 const markAsComplete = async (id) => {
   try {
@@ -11,7 +9,6 @@ const markAsComplete = async (id) => {
     console.error(error);
   }
 };
-
 
 (async () => {
   const { id } = argv;
@@ -24,4 +21,3 @@ const markAsComplete = async (id) => {
   await markAsComplete(id);
   await db.Todo.showList();
 })();
-
