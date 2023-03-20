@@ -1,4 +1,3 @@
-node_modules/
-demo/
-config/
-todo-cli/config
+node_modules
+demo
+config
