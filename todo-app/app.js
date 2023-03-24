@@ -1,21 +1,13 @@
-/* eslint-disable quotes */
-/* eslint-disable no-unused-vars */
 const express = require('express')
+const app = express()
 const { Todo } = require('./models')
 const bodyParser = require('body-parser')
-const { response, request } = require('express')
-
-// creating express app
-const app = express()
-
-// connect app with body parser
 app.use(bodyParser.json())
 
-// Creating list todos route
-app.get('/todos', async (request, response) => {
+app.get('/', async (request, response) => {
   console.log('List todos')
   try {
-    const alltodos = await Todo.findAll()
+    const alltodos = await Todo.getAllTodos()
     return response.json(alltodos)
   } catch (error) {
     console.log(error)
@@ -23,15 +15,20 @@ app.get('/todos', async (request, response) => {
   }
 })
 
-// Route for creating a todo
-app.post('/todos', async (request, response) => {
-  console.log('Creating a todo')
+app.get('/todos', async function (_request, response) {
+  console.log('Processing list of all Todos ...')
   try {
-    const todo = await Todo.create({
-      title: request.body.title,
-      dueDate: request.body.dueDate,
-      completed: false
-    })
+    const alltodos = await Todo.getAllTodos()
+    return response.json(alltodos)
+  } catch (error) {
+    console.log(error)
+    return response.status(422).json(error)
+  }
+})
+
+app.get('/todos/:id', async function (request, response) {
+  try {
+    const todo = await Todo.findByPk(request.params.id)
     return response.json(todo)
   } catch (error) {
     console.log(error)
@@ -39,21 +36,43 @@ app.post('/todos', async (request, response) => {
   }
 })
 
-// Route for updating a todo with an id
-app.put('/todos/:id/markAsCompleted/', async (request, response) => {
-  console.log('Update todo with id:', request.params.id)
+app.post('/todos', async function (request, response) {
   try {
-    const todo = await Todo.findByPk(request.params.id)
-    const updatedTodo = await todo.markAsCompleted()
-    return response.json(updatedTodo)
+    const todo = await Todo.addTodo(request.body)
+    return response.json(todo)
   } catch (error) {
-    console.log('error')
-    return response.status('422').json(error)
+    console.log(error)
+    return response.status(422).json(error)
   }
 })
 
-app.delete('/todos/:id', (request, response) => {
-  console.log('Delete todo with id:', request.params.id)
+app.put('/todos/:id/markAsCompleted', async function (request, response) {
+  const todo = await Todo.findByPk(request.params.id)
+  try {
+    const updatedTodo = await todo.markAsCompleted()
+    return response.json(updatedTodo)
+  } catch (error) {
+    console.log(error)
+    return response.status(422).json(error)
+  }
+})
+
+app.delete('/todos/:id', async function (request, response) {
+  console.log('We have to delete a Todo with ID: ', request.params.id)
+  try {
+    const todo = await Todo.findByPk(request.params.id)
+    if (todo.dataValues.id) {
+      await Todo.destroy({
+        where: {
+          id: todo.dataValues.id
+        }
+      })
+      return response.send({ success: true })
+    }
+  } catch (error) {
+    console.log(error)
+    return response.status(500).send({ success: false, error: 'Error deleting todo' })
+  }
 })
 
 module.exports = app
