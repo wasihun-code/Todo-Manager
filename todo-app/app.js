@@ -1,3 +1,4 @@
+/* eslint-disable quotes */
 /* eslint-disable no-unused-vars */
 const express = require("express");
 const { Todo } = require("./models");
