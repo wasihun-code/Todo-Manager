@@ -9,13 +9,7 @@
 </head>
 <body>
     <%- include('header.ejs') %>
-    <table>
-        <% console.log(allTodos.length) %>
-        <% for (let todo of allTodos) { %>
-            <tr>
-                <td> <%= todo.title %> </td>
-            </tr>
-       <% } %>
-    </table>
+    <%- include('todos.ejs') %>
+    <%- include('footer.ejs') %>    
 </body>
 </html>
