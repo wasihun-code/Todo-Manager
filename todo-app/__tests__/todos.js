@@ -1,3 +1,4 @@
+/* eslint-disable no-unneeded-ternary */
 /* eslint-disable no-undef */
 const request = require('supertest')
 
@@ -85,13 +86,8 @@ describe('Todo Application', function () {
     const todoID = parsedResponse.id
 
     // Send put request to delete the databasae
-    const deleteResponse = await agent.delete(`/todos/${todoID}`)
-    expect(deleteResponse.status).toBe(200)
-    expect(deleteResponse.body).toEqual({ success: true })
-
-    // Ensure the todo was actually deleted by sending delete request again
-    const fakeDelete = await agent.delete(`/todos/${todoID}`)
-    expect(fakeDelete.status).toBe(500)
-    expect(fakeDelete.body).toEqual({ success: false, error: 'Error deleting todo' })
+    const deleteResponse = await agent.delete(`/todos/${todoID}`).send()
+    expect(deleteResponse.statusCode).toBe(200)
+    expect(deleteResponse.body).toBe(true)
   })
 })

@@ -1,3 +1,4 @@
+/* eslint-disable no-unneeded-ternary */
 const express = require('express')
 const app = express()
 const { Todo } = require('./models')
@@ -56,22 +57,14 @@ app.put('/todos/:id/markAsCompleted', async function (request, response) {
     return response.status(422).json(error)
   }
 })
-
 app.delete('/todos/:id', async function (request, response) {
   console.log('We have to delete a Todo with ID: ', request.params.id)
   try {
-    const todo = await Todo.findByPk(request.params.id)
-    if (todo.dataValues.id) {
-      await Todo.destroy({
-        where: {
-          id: todo.dataValues.id
-        }
-      })
-      return response.send({ success: true })
-    }
+    const isTodoDeleted = await Todo.destroy({ where: { id: request.params.id } })
+    return response.json(isTodoDeleted ? true : false)
   } catch (error) {
     console.log(error)
-    return response.status(500).send({ success: false, error: 'Error deleting todo' })
+    return response.status(422).json(error)
   }
 })
 
