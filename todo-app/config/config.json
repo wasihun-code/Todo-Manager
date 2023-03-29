@@ -7,8 +7,8 @@
     "dialect": "postgres",
     "dialectOptions": { 
         "requestTimeout": 5000 
-    }
-      
+    },
+    "logging": false      
   },
   "test": {
     "username": "postgres",
@@ -18,11 +18,12 @@
     "dialect": "postgres",
     "dialectOptions": { 
         "requestTimeout": 5000 
-    }
-      
+    },
+    "logging": false
   },
   "production": {
     "use_env_variable" : "DATABASE_URL",
     "dialect": "postgres"
-  }
+  },
+  "logging": false
 }
