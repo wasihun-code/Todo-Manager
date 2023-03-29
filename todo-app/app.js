@@ -24,7 +24,6 @@ app.get('/', async (request, response) => {
 app.use(express.static(path.join(__dirname, 'public')))
 
 app.get('/todos', async function (_request, response) {
-  console.log('Processing list of all Todos ...')
   try {
     const alltodos = await Todo.getAllTodos()
     return response.json(alltodos)
@@ -65,7 +64,6 @@ app.put('/todos/:id/markAsCompleted', async function (request, response) {
   }
 })
 app.delete('/todos/:id', async function (request, response) {
-  console.log('We have to delete a Todo with ID: ', request.params.id)
   try {
     const isTodoDeleted = await Todo.destroy({ where: { id: request.params.id } })
     return response.json(isTodoDeleted ? true : false)
