@@ -2,21 +2,58 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="./css/styles.css" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <title>Todo Manager</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="./css/styles.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Todo Manager</title>
 </head>
 
 <body>
-  <div class="grid grid-cols-6">
-    <div class="col-start-3 col-span-2">
-      <%- include('header.ejs') %>
-      <%- include('todos.ejs') %>
-      <%- include('footer.ejs') %>
+    <div class="grid grid-cols-6">
+        <div class="col-start-3 col-span-2">
+            <%- include('header.ejs') %>
+            <form action="">
+                <div class="flex gap-2  py-4">
+                    <div class="flex-auto">
+                        <input type="text" placeholder="What's next?"
+                            class="border border-grey-300 rounded text-grey-900 w-full p-2 text-sm">
+                    </div>
+                    <div class="flex-auto">
+                        <input type="date" class="border border-grey-300 rounded text-grey-900 p-2 text-sm 1-rem">
+                    </div>
+                    <div class="flex-none">
+                        <button type="submit"
+                            class="bg-green-600 text-white px-5 py-1.5 rounded font-medium mr-2 mb-2">Add</button>
+                    </div>
+                </div>
+            </form>
+            <!-- include overdue todos here -->
+            <%- include('todos.ejs', {
+                "todoType": "Overdue" , 
+                "id" : "count-overdue", 
+                "todos" : overduetodos
+            }) %>
+
+            <!-- include due today todos here -->
+            <%- include('todos.ejs', {
+                "todoType": "Due Today", 
+                "id" : "count-due-today" , 
+                "todos" : duetodaytodos
+            }) %>
+
+            <!-- include due later todos here -->
+            <%- include('todos.ejs', {
+                "todoType": "Due Later", 
+                "id" : "count-due-Later", 
+                "todos" : duelatertodos
+            }) %>
+
+            <!-- include the page footer -->
+            <%- include('footer.ejs') %>
+        </div>
     </div>
-  </div>
 </body>
+
 </html>
