@@ -15,7 +15,7 @@
             .getAttribute("content")
         
         function updateTodo(id) {
-            fetch(`/todos/${id}/markAsCompleted`, {
+            fetch(`/todos/${id}`, {
                 method: "put",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -43,7 +43,7 @@
                     console.log("Delete OKkkkkkkkkkay")
                     window.location.reload();
                 }
-            }).catch((error) => console.log(erorr));
+            }).catch((error) => console.log(error));
         }
     </script>
 </head>
@@ -57,10 +57,10 @@
                 <div class="flex gap-2  py-4">
                     <div class="flex-auto">
                         <input type="text" name="title" placeholder="What's next?"
-                            class="border border-grey-300 rounded text-grey-900 w-full p-2 text-sm">
+                            class="border border-grey-300 rounded text-grey-900 w-full p-2 text-sm" required>
                     </div>
                     <div class="flex-auto">
-                        <input type="date" name="dueDate" class="border border-grey-300 rounded text-grey-900 p-2 text-sm 1-rem">
+                        <input type="date" name="dueDate" class="border border-grey-300 rounded text-grey-900 p-2 text-sm 1-rem" required>
                     </div>
                     <div class="flex-none">
                         <button type="submit"
@@ -87,6 +87,13 @@
                 "todoType": "Due Later", 
                 "id" : "count-due-later", 
                 "todos" : duelatertodos
+            }) %>
+
+            <!-- include completed todos here -->
+            <%- include('todos.ejs', {
+                "todoType": "Completed Items", 
+                "id" : "count-completed", 
+                "todos" : completedtodos
             }) %>
 
             <!-- include the page footer -->

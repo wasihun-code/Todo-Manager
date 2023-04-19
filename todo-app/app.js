@@ -1,5 +1,5 @@
 /* eslint-disable no-unneeded-ternary */
-const csrf = require('csurf')
+const csrf = require('tiny-csrf')
 const path = require('path')
 const express = require('express')
 const { Todo } = require('./models')
@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: false }))
 app.set('view engine', 'ejs')
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(cookieParser('shh! some secret string'))
-app.use(csrf({ cookie: true }))
+app.use(csrf('this_should_be_32_character_long', ['POST', 'PUT', 'DELETE']))
 
 // Homepage route
 app.get('/', async (request, response) => {
@@ -21,6 +21,7 @@ app.get('/', async (request, response) => {
   const overduetodos = await Todo.getOverdueTodos()
   const duetodaytodos = await Todo.getTodayTodos()
   const duelatertodos = await Todo.getDueLaterTodos()
+  const completedtodos = await Todo.getCompletedTodos()
 
   if (request.accepts('html')) {
     response.render('index', {
@@ -28,10 +29,16 @@ app.get('/', async (request, response) => {
       overduetodos,
       duetodaytodos,
       duelatertodos,
+      completedtodos,
       csrfToken: request.csrfToken()
     })
   } else {
-    response.json({ overduetodos, duetodaytodos, duelatertodos })
+    response.json({
+      overduetodos,
+      duetodaytodos,
+      duelatertodos,
+      completedtodos
+    })
   }
 })
 
@@ -67,10 +74,11 @@ app.post('/todos', async function (request, response) {
   }
 })
 
-app.put('/todos/:id/markAsCompleted', async function (request, response) {
+app.put('/todos/:id', async function (request, response) {
   const todo = await Todo.findByPk(request.params.id)
+
   try {
-    const updatedTodo = await todo.markAsCompleted()
+    const updatedTodo = await todo.setCompletionStatus(!todo.completed)
     return response.json(updatedTodo)
   } catch (error) {
     console.log(error)
