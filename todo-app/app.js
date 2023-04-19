@@ -1,13 +1,21 @@
 /* eslint-disable no-unneeded-ternary */
+const csrf = require('csurf')
+const path = require('path')
 const express = require('express')
-const app = express()
 const { Todo } = require('./models')
 const bodyParser = require('body-parser')
-const path = require('path')
+const cookieParser = require('cookie-parser')
+
+// app settings and usage
+const app = express()
 app.use(bodyParser.json())
-
+app.use(express.urlencoded({ extended: false }))
 app.set('view engine', 'ejs')
+app.use(express.static(path.join(__dirname, 'public')))
+app.use(cookieParser('shh! some secret string'))
+app.use(csrf({ cookie: true }))
 
+// Homepage route
 app.get('/', async (request, response) => {
   const allTodos = await Todo.getAllTodos()
   const overduetodos = await Todo.getOverdueTodos()
@@ -15,9 +23,15 @@ app.get('/', async (request, response) => {
   const duelatertodos = await Todo.getDueLaterTodos()
 
   if (request.accepts('html')) {
-    response.render('index', { allTodos, overduetodos, duetodaytodos, duelatertodos })
+    response.render('index', {
+      allTodos,
+      overduetodos,
+      duetodaytodos,
+      duelatertodos,
+      csrfToken: request.csrfToken()
+    })
   } else {
-    response.json({ allTodos })
+    response.json({ overduetodos, duetodaytodos, duelatertodos })
   }
 })
 
@@ -45,8 +59,8 @@ app.get('/todos/:id', async function (request, response) {
 
 app.post('/todos', async function (request, response) {
   try {
-    const todo = await Todo.addTodo(request.body)
-    return response.json(todo)
+    await Todo.addTodo(request.body)
+    return response.redirect('/')
   } catch (error) {
     console.log(error)
     return response.status(422).json(error)
@@ -65,8 +79,8 @@ app.put('/todos/:id/markAsCompleted', async function (request, response) {
 })
 app.delete('/todos/:id', async function (request, response) {
   try {
-    const isTodoDeleted = await Todo.destroy({ where: { id: request.params.id } })
-    return response.json(isTodoDeleted ? true : false)
+    await Todo.remove(request.params.id)
+    return response.json({ success: true })
   } catch (error) {
     console.log(error)
     return response.status(422).json(error)
