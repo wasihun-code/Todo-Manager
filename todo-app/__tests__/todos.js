@@ -66,16 +66,6 @@ describe('Todo Application', function () {
 
     expect(markCompleteResponse.status).toBe(200)
     expect(markCompleteResponse.body.completed).toBe(true)
-
-    res = await agent.get('/')
-    csrfToken = extractCsrfToken(res)
-
-    const markInCompleteResponse = await agent.put(`/todos/${latestTodo.id}`).send({
-      _csrf: csrfToken
-    })
-
-    expect(markInCompleteResponse.status).toBe(200)
-    expect(markInCompleteResponse.body.completed).toBe(false)
   })
 
   test('Delete a todos', async () => {
@@ -102,5 +92,41 @@ describe('Todo Application', function () {
     })
 
     expect(deletedResponse.status).toBe(200)
+  })
+  test('Mark a todo as complete', async () => {
+    let res = await agent.get('/')
+    let csrfToken = extractCsrfToken(res)
+
+    await agent.post('/todos').send({
+      title: 'Buy milk',
+      dueDate: new Date().toISOString(),
+      completed: false,
+      _csrf: csrfToken
+    })
+
+    const groupedTodosResponse = await agent.get('/').set('Accept', 'application/json')
+    const parsedGroupedResponse = JSON.parse(groupedTodosResponse.text)
+    const dueTodayCount = parsedGroupedResponse.duetodaytodos.length
+    const latestTodo = parsedGroupedResponse.duetodaytodos[dueTodayCount - 1]
+
+    res = await agent.get('/')
+    csrfToken = extractCsrfToken(res)
+
+    const markCompleteResponse = await agent.put(`/todos/${latestTodo.id}`).send({
+      _csrf: csrfToken
+    })
+
+    expect(markCompleteResponse.status).toBe(200)
+    expect(markCompleteResponse.body.completed).toBe(true)
+
+    res = await agent.get('/')
+    csrfToken = extractCsrfToken(res)
+
+    const markInCompleteResponse = await agent.put(`/todos/${latestTodo.id}`).send({
+      _csrf: csrfToken
+    })
+
+    expect(markInCompleteResponse.status).toBe(200)
+    expect(markInCompleteResponse.body.completed).toBe(false)
   })
 })

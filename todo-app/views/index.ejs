@@ -9,58 +9,22 @@
     <link href="./css/styles.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Todo Manager</title>
-    <script>
-        var token = document
-            .querySelector('meta[name="csrf-token"]')
-            .getAttribute("content")
-        
-        function updateTodo(id) {
-            fetch(`/todos/${id}`, {
-                method: "put",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    "_csrf": token
-                })
-            }).then((res) => {
-                if (res.ok) {
-                    console.log("OKkkkkkkkkkay")
-                    window.location.reload();
-                }
-            }).catch((error) => console.log(error));
-        }
-        function deleteTodo(id) {
-            console.log("Delte invoked")
-            fetch(`/todos/${id}`, {
-                method: "delete",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    "_csrf": token
-                })
-            }).then((res) => {
-                if (res.ok) {
-                    console.log("Delete OKkkkkkkkkkay")
-                    window.location.reload();
-                }
-            }).catch((error) => console.log(error));
-        }
-    </script>
+
 </head>
 
 <body>
     <div class="grid grid-cols-6">
         <div class="col-start-3 col-span-2">
             <%- include('header.ejs') %>
-            <form action="/todos" method="post">
+            <form id="todo-form" action="/todos" method="post">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
                 <div class="flex gap-2  py-4">
                     <div class="flex-auto">
-                        <input type="text" name="title" placeholder="What's next?"
+                        <input id="title" type="text" name="title" placeholder="What's next?"
                             class="border border-grey-300 rounded text-grey-900 w-full p-2 text-sm" required>
                     </div>
                     <div class="flex-auto">
-                        <input type="date" name="dueDate" class="border border-grey-300 rounded text-grey-900 p-2 text-sm 1-rem" required>
+                        <input id="dueDate" type="date" name="dueDate" class="border border-grey-300 rounded text-grey-900 p-2 text-sm 1-rem" required>
                     </div>
                     <div class="flex-none">
                         <button type="submit"
@@ -99,5 +63,56 @@
             <!-- include the page footer -->
         </div>
     </div>
+
+
+    <script>
+
+        const titleInput = document.getElementById("title");
+        const dueDateInput = document.getElementById("dueDate");
+        const todoForm = document.getElementById("todo-form");
+
+        todoForm.addEventListener("submit", (event) => {
+            if (titleInput.value.trim() === "" || dueDateInput.value.trim() === "") {
+            event.preventDefault();
+            alert("Title and dueDate fields are required to be filled");
+            }
+        });
+
+        var token = document
+            .querySelector('meta[name="csrf-token"]')
+            .getAttribute("content")
+        
+        function updateTodo(id) {
+            fetch(`/todos/${id}`, {
+                method: "put",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    "_csrf": token
+                })
+            }).then((res) => {
+                if (res.ok) {
+                    console.log("OKkkkkkkkkkay")
+                    window.location.reload();
+                }
+            }).catch((error) => console.log(error));
+        }
+        function deleteTodo(id) {
+            console.log("Delte invoked")
+            fetch(`/todos/${id}`, {
+                method: "delete",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "_csrf": token
+                })
+            }).then((res) => {
+                if (res.ok) {
+                    console.log("Delete OKkkkkkkkkkay")
+                    window.location.reload();
+                }
+            }).catch((error) => console.log(error));
+        }
+    </script>
 </body>
 </html>
