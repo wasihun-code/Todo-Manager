@@ -81,13 +81,14 @@
         var token = document
             .querySelector('meta[name="csrf-token"]')
             .getAttribute("content")
-        
         function updateTodo(id) {
+            const status = document.getElementById(`todo-checkbox-${id}`).checked
             fetch(`/todos/${id}`, {
                 method: "put",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    "_csrf": token
+                    "_csrf": token,
+                    "completed": status
                 })
             }).then((res) => {
                 if (res.ok) {

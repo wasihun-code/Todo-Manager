@@ -41,6 +41,7 @@ describe('Todo Application', function () {
     expect(response.statusCode).toBe(302)
   })
 
+  // mark a todo as complete
   test('Mark a todo as complete', async () => {
     let res = await agent.get('/')
     let csrfToken = extractCsrfToken(res)
@@ -59,15 +60,18 @@ describe('Todo Application', function () {
 
     res = await agent.get('/')
     csrfToken = extractCsrfToken(res)
-
+    const status = true
     const markCompleteResponse = await agent.put(`/todos/${latestTodo.id}`).send({
-      _csrf: csrfToken
+      _csrf: csrfToken,
+      completed: status
     })
 
     expect(markCompleteResponse.status).toBe(200)
-    expect(markCompleteResponse.body.completed).toBe(true)
+    console.log(latestTodo)
+    expect(markCompleteResponse.body.completed).toBe(status)
   })
 
+  // Test for removing a todo
   test('Delete a todos', async () => {
     let res = await agent.get('/')
     let csrfToken = extractCsrfToken(res)
@@ -90,17 +94,17 @@ describe('Todo Application', function () {
     const deletedResponse = await agent.delete(`/todos/${latestTodo.id}`).send({
       _csrf: csrfToken
     })
-
     expect(deletedResponse.status).toBe(200)
   })
-  test('Mark a todo as complete', async () => {
+
+  test('Mark a todo as incomplete', async () => {
     let res = await agent.get('/')
     let csrfToken = extractCsrfToken(res)
 
     await agent.post('/todos').send({
       title: 'Buy milk',
       dueDate: new Date().toISOString(),
-      completed: false,
+      completed: true,
       _csrf: csrfToken
     })
 
@@ -111,22 +115,13 @@ describe('Todo Application', function () {
 
     res = await agent.get('/')
     csrfToken = extractCsrfToken(res)
-
+    const status = false
     const markCompleteResponse = await agent.put(`/todos/${latestTodo.id}`).send({
-      _csrf: csrfToken
+      _csrf: csrfToken,
+      completed: status
     })
 
     expect(markCompleteResponse.status).toBe(200)
-    expect(markCompleteResponse.body.completed).toBe(true)
-
-    res = await agent.get('/')
-    csrfToken = extractCsrfToken(res)
-
-    const markInCompleteResponse = await agent.put(`/todos/${latestTodo.id}`).send({
-      _csrf: csrfToken
-    })
-
-    expect(markInCompleteResponse.status).toBe(200)
-    expect(markInCompleteResponse.body.completed).toBe(false)
+    expect(markCompleteResponse.body.completed).toBe(status)
   })
 })
