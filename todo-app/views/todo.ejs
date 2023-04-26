@@ -16,9 +16,6 @@
     <div class="grid grid-cols-6">
         <div class="col-start-3 col-span-2">
             <%- include('header.ejs') %>
-            <p class="py-2">Welcome to Todo-Manager</p>
-            <p class="py-2">New here? <a class="text-green-600" href="/signup">Sign-up now</a></p>
-            <p class="py-2">Already have an account? <a class="text-green-600" href="/login">Sign-in</a></p>
             <form id="todo-form" action="/todos" method="post">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
                 <div class="flex gap-2  py-4">
@@ -68,6 +65,54 @@
     </div>
 
 
-  
+    <script>
+
+        const titleInput = document.getElementById("title");
+        const dueDateInput = document.getElementById("dueDate");
+        const todoForm = document.getElementById("todo-form");
+
+        todoForm.addEventListener("submit", (event) => {
+            if (titleInput.value.trim() === "" || dueDateInput.value.trim() === "") {
+            event.preventDefault();
+            alert("Title and dueDate fields are required to be filled");
+            }
+        });
+
+        var token = document
+            .querySelector('meta[name="csrf-token"]')
+            .getAttribute("content")
+        
+        function updateTodo(id) {
+            fetch(`/todos/${id}`, {
+                method: "put",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    "_csrf": token
+                })
+            }).then((res) => {
+                if (res.ok) {
+                    console.log("OKkkkkkkkkkay")
+                    window.location.reload();
+                }
+            }).catch((error) => console.log(error));
+        }
+        function deleteTodo(id) {
+            console.log("Delte invoked")
+            fetch(`/todos/${id}`, {
+                method: "delete",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "_csrf": token
+                })
+            }).then((res) => {
+                if (res.ok) {
+                    console.log("Delete OKkkkkkkkkkay")
+                    window.location.reload();
+                }
+            }).catch((error) => console.log(error));
+        }
+    </script>
 </body>
 </html>
