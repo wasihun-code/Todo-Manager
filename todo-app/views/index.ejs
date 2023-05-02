@@ -1,119 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="<%= csrfToken %>" />
-    <link href="./css/styles.css" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <title>Todo Manager</title>
-
-</head>
-
-<body>
-    <div class="grid grid-cols-6">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0">
+        <meta name="csrf-token" content="<%= csrfToken %>">
+        <link href="./css/styles.css" rel="stylesheet">
+        <title>Todo Manager</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="./css/styles.css" rel="stylesheet">
+    </head>
+    <body>
+       <div class= "grid  grid-cols-6">
         <div class="col-start-3 col-span-2">
-            <%- include('header.ejs') %>
-            <form id="todo-form" action="/todos" method="post">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
-                <div class="flex gap-2  py-4">
-                    <div class="flex-auto">
-                        <input id="title" type="text" name="title" placeholder="What's next?"
-                            class="border border-grey-300 rounded text-grey-900 w-full p-2 text-sm" required>
-                    </div>
-                    <div class="flex-auto">
-                        <input id="dueDate" type="date" name="dueDate" class="border border-grey-300 rounded text-grey-900 p-2 text-sm 1-rem" required>
-                    </div>
-                    <div class="flex-none">
-                        <button type="submit"
-                            class="bg-green-600 text-white px-5 py-1.5 rounded font-medium mr-2 mb-2">Add</button>
-                    </div>
-                </div>
-            </form>
-            <!-- include overdue todos here -->
-            <%- include('todos.ejs', {
-                "todoType": "Overdue" , 
-                "id" : "count-overdue", 
-                "todos" : overduetodos
-            }) %>
-
-            <!-- include due today todos here -->
-            <%- include('todos.ejs', {
-                "todoType": "Due Today", 
-                "id" : "count-due-today" , 
-                "todos" : duetodaytodos
-            }) %>
-
-            <!-- include due later todos here -->
-            <%- include('todos.ejs', {
-                "todoType": "Due Later", 
-                "id" : "count-due-later", 
-                "todos" : duelatertodos
-            }) %>
-
-            <!-- include completed todos here -->
-            <%- include('todos.ejs', {
-                "todoType": "Completed Items", 
-                "id" : "count-completed", 
-                "todos" : completedtodos
-            }) %>
-
-            <!-- include the page footer -->
+          <%- include("header.ejs") %>
+          <p class="py-2">Welcome to the To-Do manager</p>
+          <p class="py-2">New here? <a href="/signup" class="text-blue-500">SignUp</a></p>
+          <p class="py-2">Already have an account? <a href="/login" class="text-blue-500">SignIn</a></p>
+          <%- include("footer.ejs") %>
         </div>
-    </div>
-
-
-    <script>
-
-        const titleInput = document.getElementById("title");
-        const dueDateInput = document.getElementById("dueDate");
-        const todoForm = document.getElementById("todo-form");
-
-        todoForm.addEventListener("submit", (event) => {
-            if (titleInput.value.trim() === "" || dueDateInput.value.trim() === "") {
-            event.preventDefault();
-            alert("Title and dueDate fields are required to be filled");
-            }
-        });
-
-        var token = document
-            .querySelector('meta[name="csrf-token"]')
-            .getAttribute("content")
-        function updateTodo(id) {
-            const status = document.getElementById(`todo-checkbox-${id}`).checked
-            fetch(`/todos/${id}`, {
-                method: "put",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    "_csrf": token,
-                    "completed": status
-                })
-            }).then((res) => {
-                if (res.ok) {
-                    console.log("OKkkkkkkkkkay")
-                    window.location.reload();
-                }
-            }).catch((error) => console.log(error));
-        }
-        function deleteTodo(id) {
-            console.log("Delte invoked")
-            fetch(`/todos/${id}`, {
-                method: "delete",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    "_csrf": token
-                })
-            }).then((res) => {
-                if (res.ok) {
-                    console.log("Delete OKkkkkkkkkkay")
-                    window.location.reload();
-                }
-            }).catch((error) => console.log(error));
-        }
-    </script>
-</body>
+      </div>
+    </body>
 </html>
