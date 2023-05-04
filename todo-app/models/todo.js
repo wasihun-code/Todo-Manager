@@ -11,29 +11,31 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
 
-    static addTodo ({ title, dueDate }) {
-      return this.create({ title, dueDate, completed: false })
+    static addTodo ({ title, dueDate, userId }) {
+      return this.create({ title, dueDate, completed: false, userId })
     }
 
     static getAllTodos () {
       return this.findAll()
     }
 
-    static getOverdueTodos () {
+    static getOverdueTodos (userId) {
       return this.findAll({
         where: {
           completed: false,
           dueDate: {
             [Op.lt]: new Date()
-          }
+          },
+          userId
         }
       })
     }
 
-    static getTodayTodos () {
+    static getTodayTodos (userId) {
       return this.findAll({
         where: {
           completed: false,
+          userId,
           dueDate: {
             [Op.eq]: new Date()
           }
@@ -41,10 +43,11 @@ module.exports = (sequelize, DataTypes) => {
       })
     }
 
-    static getDueLaterTodos () {
+    static getDueLaterTodos (userId) {
       return this.findAll({
         where: {
           completed: false,
+          userId,
           dueDate: {
             [Op.gt]: new Date()
           }
@@ -52,18 +55,20 @@ module.exports = (sequelize, DataTypes) => {
       })
     }
 
-    static getCompletedTodos () {
+    static getCompletedTodos (userId) {
       return this.findAll({
         where: {
-          completed: true
+          completed: true,
+          userId
         }
       })
     }
 
-    static async remove (id) {
+    static async remove (id, userId) {
       return this.destroy({
         where: {
-          id
+          id,
+          userId
         }
       })
     }
@@ -74,7 +79,13 @@ module.exports = (sequelize, DataTypes) => {
   }
   Todo.init(
     {
-      title: DataTypes.STRING,
+      title: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: true
+        }
+      },
       dueDate: DataTypes.DATEONLY,
       completed: DataTypes.BOOLEAN
     },

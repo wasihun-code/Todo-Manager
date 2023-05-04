@@ -8,8 +8,73 @@
         <link href="./css/styles.css" rel="stylesheet">
         <script src="https://cdn.tailwindcss.com"></script>
         <title>Todo Manager</title>
-    
 </head>
+
+<body>
+   <div class="grid grid-cols-6">
+    <div class="col-start-3 col-span-2">
+
+        <%- include('notifications.ejs')%>
+        <%- include('header.ejs')%>
+
+        <a href="/signout" class="text-blue-500">Signout</a>
+
+        <form action="/todos" method="post" id="todo-form">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+            <div class="flex gap-2 py-5">
+                <div class="flex-auto">
+                    <input type="text" name="title" id="todo-title"  placeholder="what's next?" class="border border-gray-300 rounded text-gray-900 w-full p-2 text-sm"/>
+                </div>
+                <div class="flex-auto">
+                    <input type="date" name="dueDate" id="todo-due-date" class="border border-gray-300 rounded text-gray-900 w-full p-2 text-sm leading-4"/>
+                </div>
+                <div class="flex-none">
+                    <button type="submit" class="bg-green-600 text-white px-5 py-1.5 rounded font-medium mr-2 mb-2 ">Add</button>
+                </div>
+            </div>  
+        </form>
+
+        <div>
+            <!-- include overdue todos here -->
+            <%- include('todo.ejs', {
+                "todoType": "Overdue" , 
+                "id" : "count-overdue", 
+                "todos" : overdue
+            }) %>
+
+            <!-- include due today todos here -->
+            <%- include('todo.ejs', {
+                "todoType": "Due Today", 
+                "id" : "count-due-today" , 
+                "todos" : dueToday
+            }) %>
+
+            <!-- include due later todos here -->
+            <%- include('todo.ejs', {
+                "todoType": "Due Later", 
+                "id" : "count-due-later", 
+                "todos" : dueLater
+            }) %>
+
+            <!-- include completed todos here -->
+            <%- include('todo.ejs', {
+                "todoType": "Completed Items", 
+                "id" : "count-completed", 
+                "todos" : completedItems
+            }) %>
+        </div>
+        
+        <% if(messages && messages.error && messages.error.length > 0)  { %>
+        <% for(var i=0; i<messages.error.length; i++) { %>
+            <h5 class="inline-block px-2 py-1 mx-2 my-1 rounded bg-red-200 text-red-600 border border-red-400">
+            <%= messages.error[i] %>
+            </h5>        
+        <% } %>
+        <% } %>
+
+    </div>
+    </div>
+
     <script>
 
         const titleInput = document.getElementById("title");
@@ -28,6 +93,7 @@
             .getAttribute("content")
         function updateTodo(id) {
             const status = document.getElementById(`todo-checkbox-${id}`).checked
+            console.log(status)
             fetch(`/todos/${id}`, {
                 method: "put",
                 headers: { "Content-Type": "application/json" },
@@ -59,77 +125,6 @@
                 }
             }).catch((error) => console.log(error));
         }
-      </script>
-      
-</head>
-
-<body>
-   <div class="grid grid-cols-6">
-    <div class="col-start-3 col-span-2">
-
-        <%- include('notifications.ejs')%>
-        <%- include('header.ejs')%>
-
-        <a href="/signout" class="text-blue-500">Signout</a>
-
-        <form action="/todos" method="post" id="todo-form">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
-            <div class="flex gap-2 py-5">
-                <div class="flex-auto">
-                    <input type="text" name="title" id="todo-title"  placeholder="what's next?" class="border border-gray-300 rounded text-gray-900 w-full p-2 text-sm"/>
-                </div>
-                <div class="flex-auto">
-                    <input type="date" name="dueDate" id="todo-due-date" class="border border-gray-300 rounded text-gray-900 w-full p-2 text-sm leading-4"/>
-                </div>
-                <div class="flex-none">
-                    <button type="submit" class="bg-green-600 text-white px-5 py-1.5 rounded font-medium mr-2 mb-2 ">Add</button>
-                </div>
-            </div>  
-        </form>
-
-        <div>
-            <!-- include overdue todos here -->
-            <%- include('todos.ejs', {
-                "todoType": "Overdue" , 
-                "id" : "count-overdue", 
-                "todos" : overduetodos
-            }) %>
-
-            <!-- include due today todos here -->
-            <%- include('todos.ejs', {
-                "todoType": "Due Today", 
-                "id" : "count-due-today" , 
-                "todos" : duetodaytodos
-            }) %>
-
-            <!-- include due later todos here -->
-            <%- include('todos.ejs', {
-                "todoType": "Due Later", 
-                "id" : "count-due-later", 
-                "todos" : duelatertodos
-            }) %>
-
-            <!-- include completed todos here -->
-            <%- include('todos.ejs', {
-                "todoType": "Completed Items", 
-                "id" : "count-completed", 
-                "todos" : completedtodos
-            }) %>
-        </div>
-        
-        <%- include('footer.ejs')%>
-        <% if(messages && messages.error && messages.error.length > 0)  { %>
-        <% for(var i=0; i<messages.error.length; i++) { %>
-            <h5 class="inline-block px-2 py-1 mx-2 my-1 rounded bg-red-200 text-red-600 border border-red-400">
-            <%= messages.error[i] %>
-            </h5>        
-        <% } %>
-        <% } %>
-
-    </div>
-    </div>
-
-
+    </script>    
 </body>
-
 </html>

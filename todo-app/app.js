@@ -37,8 +37,8 @@ app.use(
   })
 )
 
-app.use(function (request, response, next) {
-  response.locals.messages = request.flash()
+app.use(function (req, resp, next) {
+  resp.locals.messages = req.flash()
   next()
 })
 
@@ -94,43 +94,64 @@ app.get('/', async (request, response) => {
   })
 })
 
-app.get('/todos', async function (_request, response) {
+app.get('/todos',
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    const loggedUser = request.user.id
+    const overduedTodos = await Todo.getOverdueTodos(loggedUser)
+    const dueTodayTodos = await Todo.getTodayTodos(loggedUser)
+    const dueLaterTodos = await Todo.getDueLaterTodos(loggedUser)
+    const completedTodos = await Todo.getCompletedTodos(loggedUser)
+    if (request.accepts('html')) {
+      response.render('todos', {
+        title: 'Todo Application',
+        overdue: overduedTodos,
+        dueLater: dueLaterTodos,
+        dueToday: dueTodayTodos,
+        completedItems: completedTodos,
+        csrfToken: request.csrfToken()
+      })
+    } else {
+      response.status(200).json({
+        overdue: overduedTodos,
+        dueToday: dueTodayTodos,
+        dueLater: dueLaterTodos,
+        completedItems: completedTodos
+      })
+    }
+  })
+
+app.get('/todos/:id', async function (req, resp) {
   try {
-    const alltodos = await Todo.getAllTodos()
-    return response.json(alltodos)
+    const todo = await Todo.findByPk(req.params.id)
+    return resp.json(todo)
   } catch (error) {
     console.log(error)
-    return response.status(422).json(error)
+    return resp.status(422).json(error)
   }
 })
 
-app.get('/todos/:id', async function (request, response) {
-  try {
-    const todo = await Todo.findByPk(request.params.id)
-    return response.json(todo)
-  } catch (error) {
-    console.log(error)
-    return response.status(422).json(error)
-  }
-})
-
-app.post('/todos', connectEnsureLogin.ensureLoggedIn(), async function (request, response) {
-  if (request.body.title.length === 0) {
-    request.flash('Error Occured', 'Title can not be empty')
-    return response.redirect('/todos')
+app.post('/todos', connectEnsureLogin.ensureLoggedIn(), async function (req, resp) {
+  if (req.body.title.length === 0) {
+    req.flash('Error Occured', 'Title can not be empty')
+    return resp.redirect('/todos')
   }
 
-  if (request.body.dueDate.length === 0) {
-    request.flash('Error Occured', 'Date cannot be empty!')
-    return response.redirect('/todos')
+  if (req.body.dueDate.length === 0) {
+    req.flash('Error Occured', 'Date cannot be empty!')
+    return resp.redirect('/todos')
   }
 
   try {
-    await Todo.addTodo(request.body)
-    return response.redirect('/')
+    await Todo.addTodo({
+      title: req.body.title,
+      dueDate: req.body.dueDate,
+      userId: req.user.id
+    })
+    return resp.redirect('/todos')
   } catch (error) {
     console.log(error)
-    return response.status(422).json(error)
+    return resp.status(422).json(error)
   }
 })
 
@@ -147,54 +168,59 @@ app.put('/todos/:id', connectEnsureLogin.ensureLoggedIn(), async function (reque
     return response.status(422).json(error)
   }
 })
-app.delete('/todos/:id', connectEnsureLogin.ensureLoggedIn(), async function (request, response) {
-  try {
-    await Todo.remove(request.params.id)
-    return response.json({ success: true })
-  } catch (error) {
-    console.log(error)
-    return response.status(422).json(error)
-  }
-})
 
-app.post('/users', async (request, response) => {
-  if (request.body.firstName.length === 0) {
-    request.flash('Error Occured', 'First name is required')
-    return response.redirect('/signup')
+app.delete(
+  '/todos/:id',
+  connectEnsureLogin.ensureLoggedIn(),
+  async (req, resp) => {
+    try {
+      await Todo.remove(req.params.id, req.user.id)
+      return resp.json({ success: true })
+    } catch (error) {
+      console.log(error)
+      return resp.status(422).json(error)
+    }
   }
+)
 
-  if (request.body.email.length === 0) {
-    request.flash('Error Occured', 'Email is required field')
-    return response.redirect('/signup')
-  }
-
-  if (request.body.password.length < 6) {
-    request.flash('Error Occured', 'Minimum password length is 6')
-    return response.redirect('/signup')
+app.post('/users', async (req, resp) => {
+  if (req.body.firstName.length === 0) {
+    req.flash('Error Occured', 'First name is required')
+    return resp.redirect('/signup')
   }
 
-  const hashedPassword = await bcrypt.hash(request.body.password, saltRounds)
+  if (req.body.email.length === 0) {
+    req.flash('Error Occured', 'Email is required field')
+    return resp.redirect('/signup')
+  }
+
+  if (req.body.password.length < 6) {
+    req.flash('Error Occured', 'Minimum password length is 6')
+    return resp.redirect('/signup')
+  }
+
+  const hashedPassword = await bcrypt.hash(req.body.password, saltRounds)
   console.log(hashedPassword)
   try {
     const user = await User.create({
-      firstName: request.body.firstName,
-      lastName: request.body.lastName,
-      email: request.body.email,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      email: req.body.email,
       password: hashedPassword
     })
-    request.login(user, (err) => {
+    req.login(user, (err) => {
       if (err) {
         console.log(err)
       }
-      response.redirect('/todos')
+      resp.redirect('/todos')
     })
   } catch (error) {
     console.log(error)
   }
 })
 
-app.get('/login', (request, response) => {
-  response.render('login', { title: 'Login', csrfToken: request.csrfToken() })
+app.get('/login', (req, resp) => {
+  resp.render('login', { title: 'Login', csrfToken: req.csrfToken() })
 })
 
 app.post('/session',
@@ -202,18 +228,25 @@ app.post('/session',
     failureRedirect: '/login',
     failureFlash: true
   }),
-  function (request, response) {
-    console.log(request.user)
-    response.redirect('/todos')
+  function (req, resp) {
+    console.log(req.user)
+    resp.redirect('/todos')
   }
 )
 
-app.get('/signout', (request, response, next) => {
-  request.logout((err) => {
-    if (err) {
-      return next(err)
+app.get('/signup', (request, response) => {
+  response.render('signup', {
+    title: 'Signup',
+    csrfToken: request.csrfToken()
+  })
+})
+
+app.get('/signout', (req, resp, next) => {
+  req.logout((error) => {
+    if (error) {
+      return next(error)
     }
-    response.redirect('/')
+    resp.redirect('/')
   })
 })
 

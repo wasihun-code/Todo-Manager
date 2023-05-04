@@ -13,6 +13,16 @@ function extractCsrfToken (res) {
   return $('[name=_csrf]').val()
 }
 
+const login = async (agent, username, password) => {
+  let res = await agent.get('/login')
+  const csrfToken = extractCsrfToken(res)
+  res = await agent.post('/session').send({
+    email: username,
+    password,
+    _csrf: csrfToken
+  })
+}
+
 describe('Todo Application', function () {
   beforeAll(async () => {
     await db.sequelize.sync({ force: true })
@@ -29,7 +39,31 @@ describe('Todo Application', function () {
     }
   })
 
+  test('Sign up', async () => {
+    let response = await agent.get('/signup')
+    const csrfToken = extractCsrfToken(response)
+    response = await agent.post('/users').send({
+      firstName: 'Test',
+      lastName: 'User A',
+      email: 'user.abc@gmail.com',
+      password: '12345678',
+      _csrf: csrfToken
+    })
+    expect(response.statusCode).toBe(302)
+  })
+
+  test('Sign out', async () => {
+    let response = await agent.get('/todos')
+    expect(response.statusCode).toBe(200)
+    response = await agent.get('/signout')
+    expect(response.statusCode).toBe(302)
+    response = await agent.get('/todos')
+    expect(response.statusCode).toBe(302)
+  })
+
   test('Creates a todo and responds with json at /todos POST endpoint', async () => {
+    const agent = request.agent(server)
+    await login(agent, 'user.a@gmail.com', '12345678')
     const res = await agent.get('/')
     const csrfToken = extractCsrfToken(res)
     const response = await agent.post('/todos').send({
@@ -43,6 +77,8 @@ describe('Todo Application', function () {
 
   // mark a todo as complete
   test('Mark a todo as complete', async () => {
+    const agent = request.agent(server)
+    await login(agent, 'user.a@gmail.com', '12345678')
     let res = await agent.get('/')
     let csrfToken = extractCsrfToken(res)
 
@@ -73,6 +109,8 @@ describe('Todo Application', function () {
 
   // Test for removing a todo
   test('Delete a todos', async () => {
+    const agent = request.agent(server)
+    await login(agent, 'user.a@gmail.com', '12345678')
     let res = await agent.get('/')
     let csrfToken = extractCsrfToken(res)
 

@@ -11,7 +11,7 @@ td {
     text-align: center;
 }
 
-.Todo-Item:hover .trash-icon {
+.Todo-item:hover .trash-icon {
     display: block;
     margin-left: 24px;
 }
