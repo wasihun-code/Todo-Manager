@@ -18,7 +18,14 @@
         <%- include('header.ejs')%>
 
         <a href="/signout" class="text-blue-500">Signout</a>
-
+        <br>
+        <% if(messages && messages.error && messages.error.length > 0)  { %>
+            <% for(var i=0; i<messages.error.length; i++) { %>
+                <h5 class="inline-block px-2 py-1 mx-2 my-1 rounded bg-red-200 text-red-600 border border-red-400">
+                <%= messages.error[i] %>
+                </h5>        
+            <% } %>
+            <% } %>
         <form action="/todos" method="post" id="todo-form">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
             <div class="flex gap-2 py-5">
@@ -63,14 +70,7 @@
                 "todos" : completedItems
             }) %>
         </div>
-        
-        <% if(messages && messages.error && messages.error.length > 0)  { %>
-        <% for(var i=0; i<messages.error.length; i++) { %>
-            <h5 class="inline-block px-2 py-1 mx-2 my-1 rounded bg-red-200 text-red-600 border border-red-400">
-            <%= messages.error[i] %>
-            </h5>        
-        <% } %>
-        <% } %>
+
 
     </div>
     </div>

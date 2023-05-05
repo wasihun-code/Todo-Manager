@@ -132,13 +132,13 @@ app.get('/todos/:id', async function (req, resp) {
 })
 
 app.post('/todos', connectEnsureLogin.ensureLoggedIn(), async function (req, resp) {
-  if (req.body.title.length === 0) {
-    req.flash('Error Occured', 'Title can not be empty')
+  if (req.body.title.trim().length === 0) {
+    req.flash('error', 'Title can not be empty')
     return resp.redirect('/todos')
   }
 
   if (req.body.dueDate.length === 0) {
-    req.flash('Error Occured', 'Date cannot be empty!')
+    req.flash('error', 'Date cannot be empty!')
     return resp.redirect('/todos')
   }
 
@@ -185,17 +185,22 @@ app.delete(
 
 app.post('/users', async (req, resp) => {
   if (req.body.firstName.length === 0) {
-    req.flash('Error Occured', 'First name is required')
+    req.flash('error', 'First name is required')
+    return resp.redirect('/signup')
+  }
+
+  if (req.body.lastName.length === 0) {
+    req.flash('error', 'Last name is required')
     return resp.redirect('/signup')
   }
 
   if (req.body.email.length === 0) {
-    req.flash('Error Occured', 'Email is required field')
+    req.flash('error', 'Email is required')
     return resp.redirect('/signup')
   }
 
   if (req.body.password.length < 6) {
-    req.flash('Error Occured', 'Minimum password length is 6')
+    req.flash('error', 'Minimum password length is 6')
     return resp.redirect('/signup')
   }
 
@@ -215,7 +220,10 @@ app.post('/users', async (req, resp) => {
       resp.redirect('/todos')
     })
   } catch (error) {
-    console.log(error)
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      req.flash('error', 'Email already exists')
+      return resp.redirect('/signup')
+    }
   }
 })
 
